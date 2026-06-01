@@ -1,0 +1,26 @@
+# Ednaficator: Austrian AI Concierge
+
+Industrialized MCP Orchestrator for local, private assistance in Vienna (Alsergrund focus).
+
+## Core Capabilities
+- **MCP Orchestration**: Manages a fleet of 20+ MCP servers via stdio.
+- **Local LLM**: Powered by Ollama (default: gemma4).
+- **Austrian Intelligence**: Specialized logic for Wien.gv.at, ÖBB, and local services.
+- **Memory Engine**: Persistent interaction logging via `memops`.
+- **System Privacy**: Zero-install, local-only processing on RTX 4090.
+
+## Technical Architecture
+- **Backend**: FastAPI 3.0 (v14.1.0 SOTA).
+- **Frontend**: React (Glassmorphism / Secessionist aesthetic).
+- **Communication**: WebSocket for real-time chat, REST for settings/management.
+
+## Installation
+Prerequisites: `uv`, `nodejs`, `ollama`.
+```powershell
+./start.ps1
+```
+
+## Security & Privacy
+- **Local Inference**: All data stays on the host.
+- **Strict Scoping**: MCP servers are isolated and managed as child processes.
+- **No Telemetry**: Completely private by default.

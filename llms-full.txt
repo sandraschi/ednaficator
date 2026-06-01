@@ -1,0 +1,37 @@
+# Ednaficator: Full System Documentation (v14.1.0)
+
+## Overview
+Ednaficator is a high-availability, agentic control plane designed to consolidate disparate MCP services into a single, cohesive conversational interface. It is optimized for the Austrian demographic (D-A-CH region) with specific emphasis on Viennese public services and local data privacy.
+
+## Architecture
+
+### 1. The Gateway (`api_bridge.py`)
+Built on **FastAPI**, the bridge serves as the primary entry point for both the web UI and external integrations.
+- **WebSocket (`/ws`)**: Handles bi-directional chat streaming.
+- **REST API**: Manages system state, model hotswapping, and discovery telemetry.
+- **Lifespan Management**: Orchestrates the graceful startup and shutdown of the `EdnaCore` brain.
+
+### 2. The Brain (`EdnaCore`)
+The central switchboard located in `ednaficator/core/edna.py`.
+- **Manifest Building**: Aggregates tools from all active MCP clients.
+- **Orchestration**: Directs user intent to either a plain text response or a specific tool execution flow.
+- **History Management**: Maintains short-term memory (last 20 turns) for contextual continuity.
+
+### 3. MCP Orchestrator (`orchestrator.py`)
+Manages the lifecycle of child processes.
+- **Lazy Loading**: Stdio clients are initialized upon the first tool request to save resources.
+- **Isolation**: Each MCP server runs in its own process space, communicating via JSON-RPC 2.0.
+
+### 4. Ollama Integration
+Standardized on Ollama for local inference.
+- **Model Discovery**: The system polls the Ollama catalog at runtime.
+- **Tool-Call Pattern**: Uses a specialized JSON-in-text prompt to extract structured actions from unstructured user input.
+
+## Advanced Features
+- **Austrian Service Layer**: Integrations for Wiener Linien (ÖPT), Wien.gv.at Open Data, and ÖBB ticket statuses (in progress).
+- **Home Automation**: Native support for Tapo devices and MQTT-based sensors via MCP.
+- **Materialist Logic**: Strict adherence to reductionist data handling as per the Sandra Schipal persona guidelines.
+
+## Maintenance
+- **Zombie Cleanup**: `start.ps1` includes aggressive process reaping to ensure no orphaned MCP servers remain in memory.
+- **Ollama Default**: `gemma4-small` is the default runtime model due to its high efficiency on the RTX 4090.

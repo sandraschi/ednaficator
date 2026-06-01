@@ -1,0 +1,14 @@
+TYPESCRIPT VERSION FIX:
+
+Change typescript version from "^5.0.0" to "^4.9.5" in package.json
+
+The issue: react-scripts@5.0.1 only supports TypeScript versions 3.2.1 || 4.x
+
+Quick fix: Run npm install with --legacy-peer-deps flag:
+
+npm install --legacy-peer-deps
+
+Or manually edit package.json and change:
+"typescript": "^5.0.0"
+to:
+"typescript": "^4.9.5"

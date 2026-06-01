@@ -1,0 +1,15 @@
+CLEAN INSTALL REQUIRED:
+
+The TypeScript path error is from cached node_modules. Fix:
+
+1. Delete node_modules and package-lock.json:
+   Remove-Item -Recurse -Force node_modules
+   Remove-Item package-lock.json
+
+2. Clean install:
+   npm install --legacy-peer-deps
+
+3. Try again:
+   npm run dev
+
+This will force a clean TypeScript installation without path conflicts.
