@@ -19,6 +19,8 @@ $BackendPort = 10942
 $FrontendPort = 10943
 Stop-FleetPortSquatters -Ports @($BackendPort, $FrontendPort) -Label "ednaficator"
 
+if (-not (Assert-FleetPortsAvailable -Ports @($BackendPort, $FrontendPort) -Label "ednaficator")) { exit 1 }
+
 $env:FASTMCP_LOG_LEVEL = 'WARNING'
 
 Set-Location $PSScriptRoot
@@ -33,4 +35,5 @@ Write-Host 'Starting ednaficator (API + UI)...' -ForegroundColor Cyan
 Write-Host '  Backend:  http://localhost:10942' -ForegroundColor DarkGray
 Write-Host '  Frontend: http://localhost:10943' -ForegroundColor DarkGray
 uv run python start_all.py
+
 
