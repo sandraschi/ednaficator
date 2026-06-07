@@ -1,17 +1,36 @@
-Param([switch]$Headless)
+﻿param(
+    [switch]$Headless,
+    [switch]$BackendOnly,
+    [switch]$FrontendOnly,
+    [switch]$NoBrowser
+)
 
-# --- SOTA Headless Standard ---
-if ($Headless -and ($Host.UI.RawUI.WindowTitle -notmatch 'Hidden')) {
-    Start-Process pwsh -ArgumentList '-NoProfile', '-File', $PSCommandPath, '-Headless' -WindowStyle Hidden
-    exit
+$ProjectRoot = Split-Path -Parent $PSScriptRoot
+$FleetStartPath = Join-Path $ProjectRoot "scripts\FleetStartMode.ps1"
+if (-not (Test-Path -LiteralPath $FleetStartPath)) {
+    Write-Host "ERROR: Missing vendored launcher helper: $FleetStartPath" -ForegroundColor Red
+    exit 1
 }
-$WindowStyle = if ($Headless) { 'Hidden' } else { 'Normal' }
-# ------------------------------
+. $FleetStartPath
+$FleetStart = Initialize-FleetStartMode @PSBoundParameters
+Enter-FleetHeadlessConsole -Headless:$Headless -BackendOnly:$BackendOnly
+
+$BackendPort = 10942
+$FrontendPort = 10943
+Stop-FleetPortSquatters -Ports @($BackendPort, $FrontendPort) -Label "ednaficator"
 
 $env:FASTMCP_LOG_LEVEL = 'WARNING'
 
-# ednaficator Start - Standards-Compliant SOTA
-Write-Host 'Starting ednaficator...' -ForegroundColor Cyan
-
 Set-Location $PSScriptRoot
-uv run -m ednaficator
+
+if ($Headless) {
+    Write-Host 'Starting ednaficator API (headless)...' -ForegroundColor Cyan
+    uv run -m ednaficator
+    exit
+}
+
+Write-Host 'Starting ednaficator (API + UI)...' -ForegroundColor Cyan
+Write-Host '  Backend:  http://localhost:10942' -ForegroundColor DarkGray
+Write-Host '  Frontend: http://localhost:10943' -ForegroundColor DarkGray
+uv run python start_all.py
+
