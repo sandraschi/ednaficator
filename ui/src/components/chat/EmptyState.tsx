@@ -3,6 +3,7 @@ import { useEdnaStore } from '../../store';
 
 export const EmptyState = ({ onSend }: { onSend: (t: string) => void }) => {
   const servers  = useEdnaStore(s => s.servers);
+  const registry = useEdnaStore(s => s.mcpRegistry);
   const connected = useEdnaStore(s => s.connected);
   const settings = useEdnaStore(s => s.settings);
   const ready = servers.filter(s => s.ready).length;
@@ -31,8 +32,14 @@ export const EmptyState = ({ onSend }: { onSend: (t: string) => void }) => {
             : settings.ollama_model}
         </span>
         <span className="chat__empty-sep">·</span>
-        <span>{ready}/{total} MCP-Server</span>
+        <span>{ready}/{total} MCP (Claude config)</span>
       </div>
+
+      {registry?.allowlist_active && (
+        <div className="chat__empty-warn glass">
+          Allowlist active — only {registry.allowlist.join(', ')} registered.
+        </div>
+      )}
 
       {!connected && (
         <div className="chat__empty-warn glass">
@@ -42,7 +49,7 @@ export const EmptyState = ({ onSend }: { onSend: (t: string) => void }) => {
 
       {connected && ready === 0 && total > 0 && (
         <div className="chat__empty-warn glass">
-          Keine MCP-Server aktiv — Edna antwortet nur als Chat.
+          Servers registered but none started yet — Edna lazy-starts on first tool call (fileops eager at boot).
         </div>
       )}
 

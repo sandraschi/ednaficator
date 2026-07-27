@@ -13,14 +13,13 @@ Responsibilities:
 from __future__ import annotations
 
 import asyncio
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from loguru import logger
 
 from ednaficator.mcp.registry import MCPRegistry, ServerEntry, load_registry
 from ednaficator.mcp.stdio_client import MCPStdioClient, ToolDef
-
 
 # Servers to eagerly start on initialize() (always-useful ones).
 # Everything else is lazy-started on first call.
@@ -44,8 +43,7 @@ class MCPOrchestrator:
     def __init__(self, registry: MCPRegistry | None = None):
         self.registry: MCPRegistry = registry or load_registry()
         self._states: dict[str, ServerState] = {
-            name: ServerState(entry=entry)
-            for name, entry in self.registry.enabled_servers.items()
+            name: ServerState(entry=entry) for name, entry in self.registry.enabled_servers.items()
         }
         self._lock = asyncio.Lock()
 
@@ -55,11 +53,7 @@ class MCPOrchestrator:
 
     async def initialize(self) -> None:
         """Eagerly start the priority servers; others start on demand."""
-        tasks = [
-            self._ensure_started(name)
-            for name in EAGER_SERVERS
-            if name in self._states
-        ]
+        tasks = [self._ensure_started(name) for name in EAGER_SERVERS if name in self._states]
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
         logger.info(
@@ -68,11 +62,7 @@ class MCPOrchestrator:
         )
 
     async def shutdown(self) -> None:
-        tasks = [
-            state.client.stop()
-            for state in self._states.values()
-            if state.client is not None
-        ]
+        tasks = [state.client.stop() for state in self._states.values() if state.client is not None]
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
         logger.info("Orchestrator shutdown complete")
@@ -83,20 +73,28 @@ class MCPOrchestrator:
 
     async def get_tool_manifest(self, server_names: list[str] | None = None) -> str:
         """
-        Return a compact text tool manifest for inclusion in the Ollama system prompt.
-        If server_names is None, uses all ready (already-started) servers to avoid
-        cold-starting everything just to build a prompt.
+        Return a compact text tool manifest for inclusion in the LLM system prompt.
+        Ready servers list each tool; registered-but-idle servers are listed so the LLM
+        knows valid server names (they lazy-start on first call).
         """
         lines: list[str] = []
         for name, state in self._states.items():
             if server_names is not None and name not in server_names:
                 continue
-            if not state.ready:
+            if state.ready and state.client:
+                for tool in state.client.tools:
+                    desc = tool.description[:120].replace("\n", " ")
+                    lines.append(f"  [{name}] {tool.name} — {desc}")
                 continue
-            for tool in state.client.tools:  # type: ignore[union-attr]
-                desc = tool.description[:120].replace("\n", " ")
-                lines.append(f"  [{name}] {tool.name} — {desc}")
-        return "\n".join(lines) if lines else "(no tools currently loaded)"
+            if state.start_error:
+                lines.append(f"  [{name}] (failed to start — {state.start_error[:80]})")
+            else:
+                lines.append(f"  [{name}] (registered — lazy-start on first tool call)")
+        return (
+            "\n".join(lines)
+            if lines
+            else "(no MCP servers registered — check Claude Desktop config)"
+        )
 
     async def all_tools(self) -> list[ToolDef]:
         """Flat list of all tools across ready servers."""
@@ -110,9 +108,7 @@ class MCPOrchestrator:
     # Tool execution
     # ------------------------------------------------------------------
 
-    async def call_tool(
-        self, server_name: str, tool_name: str, arguments: dict[str, Any]
-    ) -> Any:
+    async def call_tool(self, server_name: str, tool_name: str, arguments: dict[str, Any]) -> Any:
         """
         Call a tool on the named server. Lazy-starts the server if not running.
         Raises MCPStdioError on protocol errors, ValueError if server unknown.
@@ -124,9 +120,7 @@ class MCPOrchestrator:
         state = self._states[server_name]
 
         if not state.ready:
-            raise RuntimeError(
-                f"Server {server_name} failed to start: {state.start_error}"
-            )
+            raise RuntimeError(f"Server {server_name} failed to start: {state.start_error}")
 
         logger.debug(f"[{server_name}] calling {tool_name}({arguments})")
         result = await state.client.call_tool(tool_name, arguments)  # type: ignore[union-attr]

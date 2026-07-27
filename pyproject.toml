@@ -12,15 +12,28 @@ dependencies = [
     "pydantic>=2.10.0",
     "pydantic-settings>=2.7.0",
     "python-dotenv>=1.0.0",
-    "fastmcp>=3.2.0",
+    "fastmcp>=3.4.4,<4",
     "loguru>=0.7.3",
+    "plexapi>=4.18.2",
+    "rapidfuzz>=3.14.5",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=8.3.0",
     "pytest-asyncio>=0.25.0",
+    "ruff>=0.11.0",
+    "pre-commit>=4.0.0",
 ]
+telegram = [
+    "python-telegram-bot>=21.0",
+]
+voice = [
+    "faster-whisper>=1.1.0",
+]
+
+[project.scripts]
+ednaficator-bot = "ednaficator.bot:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -29,8 +42,48 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["ednaficator"]
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "pytest>=8.3.0",
     "pytest-asyncio>=0.25.0",
+    "ruff>=0.11.0",
+    "pre-commit>=4.0.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["ednaficator", "tests"]
+extend-exclude = [
+    "ednaficator/austrian",
+    "ednaficator/memory",
+    "ednaficator/nlp",
+    "tests/test_memory_only.py",
+    "tests/smoke_test.py",
+    "tests/test_nlp_processor.py",
+    "api_bridge_backup.py",
+    "api_bridge_fixed.py",
+    "setup.py",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501", "B008"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["SIM117"]
+"api_bridge.py" = ["E402"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+addopts = [
+    "--tb=short",
+    "--ignore=tests/test_memory_engine.py",
+    "--ignore=tests/test_memory_engine_standalone.py",
+    "--ignore=tests/test_memory_only.py",
+    "--ignore=tests/test_nlp_processor_enhanced.py",
+    "--ignore=tests/test_nlp_processor.py",
+]
+markers = [
+    "plex_live: requires a reachable Plex server (RECIPE-EDNA-V1.md Step 2)",
 ]

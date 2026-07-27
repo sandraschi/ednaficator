@@ -13,7 +13,6 @@ Kept structurally close to the original so tests can still import it.
 from __future__ import annotations
 
 import re
-import asyncio
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -23,7 +22,8 @@ from loguru import logger
 @dataclass
 class Intent:
     """Parsed user intent — used internally and in legacy code paths."""
-    category: str        # home, media, austrian_services, shopping, general, workflow
+
+    category: str  # home, media, austrian_services, shopping, general, workflow
     action: str
     target: str
     params: dict[str, Any] = field(default_factory=dict)
@@ -142,6 +142,7 @@ class NLPProcessor:
             # Strip possible markdown fences
             raw = raw.strip().lstrip("```json").lstrip("```").rstrip("```").strip()
             import json
+
             data = json.loads(raw)
             return Intent(
                 category=data.get("category", "general"),
@@ -168,8 +169,16 @@ class NLPProcessor:
         if time_matches:
             entities["time"] = time_matches
         districts = [
-            "innere stadt", "leopoldstadt", "landstraße", "wieden", "margareten",
-            "mariahilf", "neubau", "josefstadt", "alsergrund", "favoriten",
+            "innere stadt",
+            "leopoldstadt",
+            "landstraße",
+            "wieden",
+            "margareten",
+            "mariahilf",
+            "neubau",
+            "josefstadt",
+            "alsergrund",
+            "favoriten",
         ]
         for d in districts:
             if d in text.lower():

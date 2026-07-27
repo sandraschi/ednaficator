@@ -1,39 +1,37 @@
-﻿param(
+﻿# Fleet unified launcher - do not edit logic here.
+# Change fleet-start.config.ps1 at the repo root instead.
+param(
     [switch]$Headless,
     [switch]$BackendOnly,
     [switch]$FrontendOnly,
-    [switch]$NoBrowser
+    [switch]$NoBrowser,
+    [switch]$ReuseIfRunning
 )
 
-$ProjectRoot = Split-Path -Parent $PSScriptRoot
-$FleetStartPath = Join-Path $ProjectRoot "scripts\FleetStartMode.ps1"
-if (-not (Test-Path -LiteralPath $FleetStartPath)) {
-    Write-Host "ERROR: Missing vendored launcher helper: $FleetStartPath" -ForegroundColor Red
+$ErrorActionPreference = 'Stop'
+$ReposRoot = if ($env:FLEET_REPOS_ROOT) { $env:FLEET_REPOS_ROOT } else { 'D:\Dev\repos' }
+$EnginePath = Join-Path $ReposRoot 'mcp-central-docs\scripts\Invoke-FleetWebappStart.ps1'
+if (-not (Test-Path -LiteralPath $EnginePath)) {
+    Write-Host "ERROR: Missing fleet start engine: $EnginePath" -ForegroundColor Red
     exit 1
 }
-. $FleetStartPath
-$FleetStart = Initialize-FleetStartMode @PSBoundParameters
-Enter-FleetHeadlessConsole -Headless:$Headless -BackendOnly:$BackendOnly
+. $EnginePath
 
-$BackendPort = 10942
-$FrontendPort = 10943
-Stop-FleetPortSquatters -Ports @($BackendPort, $FrontendPort) -Label "ednaficator"
-
-if (-not (Assert-FleetPortsAvailable -Ports @($BackendPort, $FrontendPort) -Label "ednaficator")) { exit 1 }
-
-$env:FASTMCP_LOG_LEVEL = 'WARNING'
-
-Set-Location $PSScriptRoot
-
-if ($Headless) {
-    Write-Host 'Starting ednaficator API (headless)...' -ForegroundColor Cyan
-    uv run -m ednaficator
-    exit
+$configCandidates = @(
+    (Join-Path $PSScriptRoot 'fleet-start.config.ps1'),
+    (Join-Path (Split-Path -Parent $PSScriptRoot) 'fleet-start.config.ps1')
+)
+$configPath = $null
+foreach ($candidate in $configCandidates) {
+    if (Test-Path -LiteralPath $candidate) {
+        $configPath = $candidate
+        break
+    }
+}
+if (-not $configPath) {
+    Write-Host 'ERROR: Missing fleet-start.config.ps1 (repo root or beside start.ps1).' -ForegroundColor Red
+    exit 1
 }
 
-Write-Host 'Starting ednaficator (API + UI)...' -ForegroundColor Cyan
-Write-Host '  Backend:  http://localhost:10942' -ForegroundColor DarkGray
-Write-Host '  Frontend: http://localhost:10943' -ForegroundColor DarkGray
-uv run python start_all.py
-
+Start-FleetWebapp @PSBoundParameters -ConfigPath $configPath -LauncherRoot $PSScriptRoot
 

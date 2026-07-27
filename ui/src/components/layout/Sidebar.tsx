@@ -1,7 +1,7 @@
 import React from 'react';
 import { useEdnaStore, ServerInfo } from '../../store';
 import { OrnamentH } from '../common/Ornament';
-import { Server as ServerIcon, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Server as ServerIcon, ShieldCheck } from 'lucide-react';
 
 const ServerRow = ({ s }: { s: ServerInfo }) => (
   <div className={`srv srv--${s.ready ? 'ok' : s.error ? 'err' : 'idle'}`}>
@@ -13,21 +13,29 @@ const ServerRow = ({ s }: { s: ServerInfo }) => (
 
 export const Sidebar: React.FC<{ open: boolean }> = ({ open }) => {
   const servers = useEdnaStore(s => s.servers);
+  const registry = useEdnaStore(s => s.mcpRegistry);
   const ready   = servers.filter(s => s.ready).length;
+  const configLabel = registry?.config_path
+    ? registry.config_path.split(/[/\\]/).pop()
+    : 'Claude Desktop config';
   
   return (
     <aside className={`sidebar glass ${open ? 'sidebar--open' : 'sidebar--closed'}`}>
       <div className="sidebar__head">
         <div className="sidebar__title-wrap">
           <ServerIcon size={16} />
-          <span className="sidebar__title">MCP Fleet</span>
+          <span className="sidebar__title">MCP Registry</span>
         </div>
         <span className="sidebar__count">{ready}/{servers.length}</span>
+      </div>
+      <div className="sidebar__meta">
+        from {configLabel}
+        {registry?.allowlist_active ? ' · allowlist' : ''}
       </div>
       <OrnamentH />
       <div className="sidebar__list">
         {servers.length === 0
-          ? <div className="sidebar__empty">warte auf Fleet Discovery…</div>
+          ? <div className="sidebar__empty">No servers in Claude config (or allowlist filtered all)</div>
           : servers.map(s => <ServerRow key={s.name} s={s} />)
         }
       </div>

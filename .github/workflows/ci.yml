@@ -1,0 +1,41 @@
+# Windows-only lightweight CI (fleet standard)
+# Private repos: keep GitHub Actions disabled at account level; run scripts/ci.ps1 locally.
+
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: Lint and Test (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python dependencies
+        run: uv sync --group dev
+
+      - name: Ruff check
+        run: uv run ruff check ednaficator tests api_bridge.py
+
+      - name: Ruff format check
+        run: uv run ruff format --check ednaficator tests api_bridge.py
+
+      - name: Pytest
+        run: uv run pytest -q --tb=short

@@ -13,15 +13,15 @@ One client instance per server. EdnaCore manages the pool.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from loguru import logger
 
 from ednaficator.mcp.registry import ServerEntry
-
 
 # How long to wait for a response from an MCP server (seconds)
 CALL_TIMEOUT = 30.0
@@ -84,10 +84,8 @@ class MCPStdioClient:
         await asyncio.sleep(0.3)
         if self._proc.returncode is not None:
             stderr_raw = b""
-            try:
+            with contextlib.suppress(Exception):
                 _, stderr_raw = await asyncio.wait_for(self._proc.communicate(), timeout=2.0)
-            except Exception:
-                pass
             stderr_text = stderr_raw.decode(errors="replace").strip()[:300]
             raise MCPStdioError(
                 f"Process exited immediately (rc={self._proc.returncode}): {stderr_text or '(no stderr)'}"

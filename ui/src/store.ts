@@ -20,6 +20,16 @@ export interface ServerInfo {
   error: string | null;
 }
 
+export interface McpRegistryInfo {
+  source: string;
+  config_path: string;
+  allowlist_active: boolean;
+  allowlist: string[];
+  registered: number;
+  enabled: number;
+  eager_servers: string[];
+}
+
 export interface Settings {
   llm_provider: LLMProvider;
   ollama_base_url: string;
@@ -35,6 +45,7 @@ interface EdnaStore {
   thinking: boolean;
   connected: boolean;
   servers: ServerInfo[];
+  mcpRegistry: McpRegistryInfo | null;
   sidebarOpen: boolean;
   settings: Settings;
 
@@ -42,6 +53,7 @@ interface EdnaStore {
   setThinking: (v: boolean) => void;
   setConnected: (v: boolean) => void;
   setServers: (s: ServerInfo[]) => void;
+  setMcpRegistry: (info: McpRegistryInfo | null) => void;
   setSettings: (s: Partial<Settings>) => void;
   toggleSidebar: () => void;
   clearMessages: () => void;
@@ -55,6 +67,7 @@ export const useEdnaStore = create<EdnaStore>((set) => ({
   thinking: false,
   connected: false,
   servers: [],
+  mcpRegistry: null,
   sidebarOpen: true,
   settings: {
     llm_provider: 'lmstudio',
@@ -71,6 +84,7 @@ export const useEdnaStore = create<EdnaStore>((set) => ({
   setThinking: (v) => set({ thinking: v }),
   setConnected: (v) => set({ connected: v }),
   setServers: (servers) => set({ servers }),
+  setMcpRegistry: (mcpRegistry) => set({ mcpRegistry }),
   setSettings: (updates) => set((s) => ({ settings: { ...s.settings, ...updates } })),
   toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
   clearMessages: () => set({ messages: [] }),

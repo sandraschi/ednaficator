@@ -10,8 +10,9 @@ if sys.platform == "win32":
 
 
 def main() -> None:
-    import uvicorn
     from pathlib import Path
+
+    import uvicorn
 
     root = Path(__file__).resolve().parent.parent
     if str(root) not in sys.path:

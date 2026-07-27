@@ -1,0 +1,10 @@
+{
+  "123456789": {
+    "name": "Sandra (admin test)",
+    "plex_client": "Wohnzimmer TV"
+  },
+  "987654321": {
+    "name": "Edna",
+    "plex_client": "Wohnzimmer TV"
+  }
+}

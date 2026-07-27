@@ -43,13 +43,19 @@ If you prefer not to use `just`:
    ```
 4. Start the server:
    ```powershell
-   # stdio mode (for MCP clients like Claude Desktop)
-   uv run python -m ednaficator.server
+   # HTTP API + EdnaCore (canonical)
+   uv run python -m ednaficator
 
-   # HTTP mode (for web dashboard)
-   uv run uvicorn ednaficator.server:app --port 10942
+   # Same backend via uvicorn directly
+   uv run uvicorn api_bridge:app --host 127.0.0.1 --port 10942
+
+   # API + React UI
+   uv run python start_all.py
    ```
-5. Open `http://localhost:10942` or the frontend URL.
+5. Copy `.env.example` to `.env`; set `CLAUDE_DESKTOP_CONFIG` if needed.
+6. Open `http://127.0.0.1:10943` (UI) or `http://127.0.0.1:10942/health` (API).
+
+See [docs/MCP_REGISTRY.md](docs/MCP_REGISTRY.md) for how MCP servers are registered.
 
 ---
 

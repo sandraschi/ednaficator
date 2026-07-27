@@ -15,10 +15,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from ednaficator.mcp.registry import load_registry
+from ednaficator.core.edna import EdnaCore
 from ednaficator.llm.ollama_client import OllamaClient
 from ednaficator.mcp.orchestrator import MCPOrchestrator
-from ednaficator.core.edna import EdnaCore
+from ednaficator.mcp.registry import load_registry
 
 
 async def main():

@@ -2,7 +2,18 @@
 
 ## What it is
 
-Conversational front-end for your Claude Desktop MCP fleet. Family asks in plain language; Edna picks a tool via local Ollama and calls the right MCP over stdio.
+Conversational front-end for MCP tools listed in **Claude Desktop config** (not fleet auto-scan). Family asks in plain language; Edna picks a tool via local LLM and calls the right MCP over stdio.
+
+Full detail: [docs/MCP_REGISTRY.md](docs/MCP_REGISTRY.md)
+
+## MCP registry
+
+| Env | Purpose |
+|-----|---------|
+| `CLAUDE_DESKTOP_CONFIG` | Path to JSON with `mcpServers` |
+| `EDNA_MCP_ALLOWLIST` | Optional comma-separated names (family safety) |
+
+Only `fileops` starts at boot; other servers lazy-start on first tool call.
 
 ## Start
 
@@ -24,6 +35,17 @@ uv run python start_all.py
 | Ollama | `http://localhost:11434` | `EDNA_LLM_PROVIDER=ollama` |
 
 LM Studio: load a model, turn on **Local Server** in the app. Ollama health checks use a 5s timeout so a hung Ollama no longer blocks startup when using LM Studio.
+
+## Quality gates (Windows)
+
+```powershell
+just ci                  # ruff + pytest (same as scripts/ci.ps1)
+just hooks-install       # pre-commit git hooks
+just lint
+just test
+```
+
+Fleet CI file: `.github/workflows/ci.yml` (Windows-only). Private repo: keep GitHub Actions disabled at account level; run `just ci` locally.
 
 ## Smoke test
 

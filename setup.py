@@ -6,11 +6,11 @@ Handles initial configuration, dependency checking,
 and Austrian service setup.
 """
 
-import os
-import sys
 import asyncio
+import sys
 from pathlib import Path
-from ednaficator.config.settings import create_default_config_file, validate_config, load_config
+
+from ednaficator.config.settings import create_default_config_file, load_config, validate_config
 
 
 def check_python_version():
@@ -19,7 +19,7 @@ def check_python_version():
         print("❌ Python 3.11+ required")
         print(f"   Current version: {sys.version}")
         return False
-    
+
     print(f"✅ Python {sys.version.split()[0]} detected")
     return True
 
@@ -27,10 +27,15 @@ def check_python_version():
 def check_dependencies():
     """Check if required dependencies are installed"""
     required_packages = [
-        "fastapi", "uvicorn", "pydantic", "asyncio", 
-        "requests", "pyyaml", "pathlib"
+        "fastapi",
+        "uvicorn",
+        "pydantic",
+        "asyncio",
+        "requests",
+        "pyyaml",
+        "pathlib",
     ]
-    
+
     missing = []
     for package in required_packages:
         try:
@@ -39,24 +44,19 @@ def check_dependencies():
         except ImportError:
             missing.append(package)
             print(f"❌ {package} missing")
-    
+
     if missing:
-        print(f"\n📦 Install missing packages:")
+        print("\n📦 Install missing packages:")
         print(f"   pip install {' '.join(missing)}")
         return False
-    
+
     return True
 
 
 def setup_directories(config: dict):
     """Create necessary directories"""
-    directories = [
-        config["memory_path"],
-        "./logs",
-        "./data",
-        "./exports"
-    ]
-    
+    directories = [config["memory_path"], "./logs", "./data", "./exports"]
+
     for directory in directories:
         path = Path(directory)
         path.mkdir(exist_ok=True, parents=True)
@@ -67,12 +67,12 @@ def setup_austrian_services():
     """Setup Austrian service configurations"""
     print("\n🇦🇹 Austrian Services Setup")
     print("=" * 40)
-    
+
     print("Optional API keys for enhanced functionality:")
     print("• Wien.gv.at API: https://www.data.gv.at/")
     print("• ÖBB API: https://www.oebb.at/")
     print("• Many services work without API keys!")
-    
+
     # Create .env file template
     env_template = """# Ednaficator Environment Variables
 # Copy this to .env and fill in your values
@@ -93,10 +93,10 @@ EDNA_ANONYMIZE_LOGS=true
 EDNA_DEBUG=true
 EDNA_LOG_LEVEL=INFO
 """
-    
+
     with open(".env.template", "w") as f:
         f.write(env_template)
-    
+
     print("✅ Created .env.template file")
 
 
@@ -104,9 +104,10 @@ def test_local_llm():
     """Test local LLM connection"""
     print("\n🤖 Testing Local LLM Connection")
     print("=" * 40)
-    
+
     try:
         import requests
+
         response = requests.get("http://localhost:11434/api/tags", timeout=5)
         if response.status_code == 200:
             models = response.json().get("models", [])
@@ -127,11 +128,11 @@ async def main():
     print("=" * 50)
     print("Austrian AI Concierge - Privacy First!")
     print("=" * 50)
-    
+
     # Check Python version
     if not check_python_version():
         return 1
-    
+
     # Check dependencies
     print("\n📦 Checking Dependencies")
     print("=" * 30)
@@ -139,29 +140,29 @@ async def main():
         print("\n💡 Install dependencies with:")
         print("   pip install -r requirements.txt")
         return 1
-    
+
     # Create config file if it doesn't exist
     config_file = "ednaficator_config.yaml"
     if not Path(config_file).exists():
         print(f"\n⚙️  Creating default config: {config_file}")
         create_default_config_file(config_file)
-    
+
     # Load and validate config
     config = load_config(config_file)
     if not validate_config(config):
         return 1
-    
+
     # Setup directories
     print("\n📁 Setting up directories")
     print("=" * 30)
     setup_directories(config)
-    
+
     # Setup Austrian services
     setup_austrian_services()
-    
+
     # Test local LLM
     test_local_llm()
-    
+
     # Final instructions
     print("\n🎯 Setup Complete!")
     print("=" * 20)
@@ -171,7 +172,7 @@ async def main():
     print("3. Copy .env.template to .env and configure")
     print("4. Start Edna: python -m ednaficator.main")
     print("\n🇦🇹 Willkommen zu Ednaficator!")
-    
+
     return 0
 
 

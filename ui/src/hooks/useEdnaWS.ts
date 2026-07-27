@@ -8,14 +8,30 @@ const SERVERS_URL = '/api/servers';
 export function useEdnaWS() {
   const ws = useRef<WebSocket | null>(null);
   const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const { addMessage, setThinking, setConnected, setServers } = useEdnaStore();
+  const { addMessage, setThinking, setConnected, setServers, setMcpRegistry } = useEdnaStore();
 
   const fetchServers = useCallback(async () => {
     try {
       const res = await fetch(SERVERS_URL);
-      if (res.ok) setServers(await res.json());
+      if (!res.ok) return;
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setServers(data);
+        setMcpRegistry(null);
+        return;
+      }
+      setServers(data.servers ?? []);
+      setMcpRegistry({
+        source: data.source ?? 'claude_desktop_config',
+        config_path: data.config_path ?? '',
+        allowlist_active: Boolean(data.allowlist_active),
+        allowlist: data.allowlist ?? [],
+        registered: data.registered ?? (data.servers?.length ?? 0),
+        enabled: data.enabled ?? (data.servers?.length ?? 0),
+        eager_servers: data.eager_servers ?? [],
+      });
     } catch { /* backend not up yet */ }
-  }, [setServers]);
+  }, [setServers, setMcpRegistry]);
 
   const connect = useCallback(() => {
     if (ws.current?.readyState === WebSocket.OPEN) return;
