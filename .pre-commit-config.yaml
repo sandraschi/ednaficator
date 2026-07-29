@@ -3,7 +3,5 @@ repos:
     rev: v0.11.12
     hooks:
       - id: ruff
-        files: ^(ednaficator/|tests/|api_bridge\.py)
         args: [--fix]
       - id: ruff-format
-        files: ^(ednaficator/|tests/|api_bridge\.py)
