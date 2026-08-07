@@ -9,7 +9,7 @@ set shell := ["powershell", "-c"]
 default:
     @just --list
 
-# --- 🚀 Operations ---
+# --- Operations --- ---
 
 # Start the API server (Canonical)
 run:
@@ -27,7 +27,7 @@ start:
 run-api:
     powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./start.ps1 -Headless
 
-# --- 🧪 Quality Gates ---
+# --- Quality Gates --- ---
 
 # LINT: Check for code quality issues
 lint:
@@ -54,9 +54,15 @@ hooks-install:
 hooks-run:
     uv run pre-commit run --all-files
 
-# --- 🧹 Maintenance ---
+# --- Maintenance --- ---
 
 # CLEAN: Purge artifacts and caches
 clean:
     @Remove-Item -Recurse -Force .venv, .pytest_cache, .ruff_cache -ErrorAction SilentlyContinue
     @Get-ChildItem -Recurse -Filter "__pycache__" | Remove-Item -Recurse -Force
+
+# Bootstrap: install dev deps + pre-commit hook
+bootstrap:
+    uv sync --group dev
+    uv run pre-commit install
+    Write-Host "Pre-commit hooks installed." -ForegroundColor Green
