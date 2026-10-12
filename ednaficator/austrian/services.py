@@ -5,6 +5,7 @@ Provides specialized support for Austrian government services,
 local businesses, and Vienna-specific functionality.
 """
 
+import asyncio
 from datetime import datetime
 
 import requests
@@ -88,7 +89,7 @@ class WienGovServices:
     async def is_available(self) -> bool:
         """Check if Wien.gv.at services are accessible"""
         try:
-            response = requests.get("https://www.wien.gv.at", timeout=5)
+            response = await asyncio.to_thread(requests.get, "https://www.wien.gv.at", timeout=5)
             return response.status_code == 200
         except:
             return False
@@ -119,7 +120,7 @@ class OEBBServices:
     async def is_available(self) -> bool:
         """Check if ÖBB services are accessible"""
         try:
-            response = requests.get("https://www.oebb.at", timeout=5)
+            response = await asyncio.to_thread(requests.get, "https://www.oebb.at", timeout=5)
             return response.status_code == 200
         except:
             return False
@@ -155,7 +156,7 @@ class GeizhalsPriceService:
     async def is_available(self) -> bool:
         """Check if Geizhals is accessible"""
         try:
-            response = requests.get("https://geizhals.at", timeout=5)
+            response = await asyncio.to_thread(requests.get, "https://geizhals.at", timeout=5)
             return response.status_code == 200
         except:
             return False
@@ -196,7 +197,9 @@ class FinanzOnlineService:
     async def is_available(self) -> bool:
         """Check if FinanzOnline is accessible"""
         try:
-            response = requests.get("https://finanzonline.bmf.gv.at", timeout=5)
+            response = await asyncio.to_thread(
+                requests.get, "https://finanzonline.bmf.gv.at", timeout=5
+            )
             return response.status_code == 200
         except:
             return False
