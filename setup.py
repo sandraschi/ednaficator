@@ -161,7 +161,7 @@ async def main():
     setup_austrian_services()
 
     # Test local LLM
-    test_local_llm()
+    await asyncio.to_thread(test_local_llm)
 
     # Final instructions
     print("\n🎯 Setup Complete!")
