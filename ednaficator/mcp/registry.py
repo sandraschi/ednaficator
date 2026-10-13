@@ -24,7 +24,11 @@ def default_config_path() -> Path:
     return Path(
         os.environ.get(
             "CLAUDE_DESKTOP_CONFIG",
-            r"C:\Users\sandr\AppData\Roaming\Claude\claude_desktop_config.json",
+            os.path.join(
+                os.environ.get("APPDATA", os.path.expanduser(r"~\AppData\Roaming")),
+                "Claude",
+                "claude_desktop_config.json",
+            ),
         )
     )
 
