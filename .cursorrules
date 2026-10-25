@@ -43,7 +43,7 @@
 - Design patterns for MCP servers and development
 
 ### Projects (`docs/projects/`)
-- myai, veogen, mywienerlinien, autohotkey
+- myai, veogen, publictransport-mcp, autohotkey
 
 ### Fleet games (`docs/games/`)
 - Shippable Godot + MCP portfolio titles (e.g. Marble Adventure)
