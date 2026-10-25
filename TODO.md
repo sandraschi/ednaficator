@@ -61,7 +61,7 @@ adaptations / 70s Austropop — and ChatGPT cannot play them on her TV. Scope:
       tool-calling on the LLM (qwen2.5:27b / Mistral Small both handle it)
 - [ ] **Delete** custom memory engine + `edna_memory/*.json` → per-user SQLite or
       advanced-memory MCP bridge (pick one, not both)
-- [ ] Curate tool whitelist per-tool, not per-server (tapo-camera, plex, mywienerlinien,
+- [ ] Curate tool whitelist per-tool, not per-server (tapo-camera, plex, publictransport-mcp,
       weather, reminders). Partial: `EDNA_MCP_ALLOWLIST` filters by server name today
 - [ ] Confirmation turn for side-effectful tools; results rendered from tool output,
       never from model prose
