@@ -26,7 +26,7 @@ Keys prefixed with `_` in Claude config are disabled (Desktop convention).
 Set before starting the API:
 
 ```powershell
-$env:EDNA_MCP_ALLOWLIST = "plex-mcp,tapo-camera-mcp,mywienerlinien-mcp"
+$env:EDNA_MCP_ALLOWLIST = "plex-mcp,tapo-camera-mcp,publictransport-mcp-mcp"
 uv run python -m ednaficator
 ```
 
